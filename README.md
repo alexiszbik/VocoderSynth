@@ -1,5 +1,2 @@
-# Daisy Test
-
-## Description
-
-This is a basic code to test Daisy board
+# VocoderSynth
+Small synth for driving my vocoder pedal made with Daisy
