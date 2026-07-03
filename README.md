@@ -1,2 +1,2 @@
 # VocoderSynth
-Small synth for driving my vocoder pedal made with Daisy
+Small synth made with Daisy for driving my vocoder pedal 

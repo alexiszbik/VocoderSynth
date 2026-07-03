@@ -10,3 +10,6 @@
 [submodule "DaisyYMNK"]
 	path = DaisyYMNK
 	url = https://github.com/alexiszbik/DaisyYMNK.git
+[submodule "JuicyDaisy"]
+	path = JuicyDaisy
+	url = git@github.com:alexiszbik/JuicyDaisy.git
