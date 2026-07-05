@@ -17,7 +17,7 @@ void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer out, s
 }
 
 int main(void) {
-    db.init(AudioCallback, 64);
+    db.init(AudioCallback, 24);
 
     for (;;) {
         db.listen();

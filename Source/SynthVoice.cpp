@@ -8,7 +8,7 @@ void SynthVoice::init(double sampleRate) {
 
     osc.Init(sampleRate);
     osc.SetWaveform(Oscillator::WAVE_POLYBLEP_SQUARE);
-    osc.SetAmp(1.f);
+    osc.SetAmp(0.707f);
 
     adsr.Init(sampleRate);
 }
