@@ -7,6 +7,11 @@
 
 class PolySynth {
 public:
+    enum EPolyMode {
+        Mono = 0,
+        Poly
+    };
+
     PolySynth();
     ~PolySynth();
 
@@ -16,10 +21,15 @@ public:
     void setGlide(float glide);
     void setRelease(float release);
     void setFixedEnvelope(float attack, float decay, float sustain);
+    void setPolyMode(EPolyMode newPolyMode);
 
+    EPolyMode getPolyMode() const;
     float process();
 
 private:
+    int activeVoiceCount() const;
+
+    EPolyMode polyMode = Poly;
     std::vector<SynthVoice*> voices;
     std::vector<Note> noteState;
 

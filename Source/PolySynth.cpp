@@ -21,6 +21,26 @@ void PolySynth::init(double sampleRate) {
     }
 }
 
+int PolySynth::activeVoiceCount() const {
+    return polyMode == Mono ? 1 : VOICE_COUNT;
+}
+
+void PolySynth::setPolyMode(EPolyMode newPolyMode) {
+    if (newPolyMode != polyMode) {
+        polyMode = newPolyMode;
+        noteState.clear();
+
+        for (auto* voice : voices) {
+            voice->setNoteOff();
+            voice->kill();
+        }
+    }
+}
+
+PolySynth::EPolyMode PolySynth::getPolyMode() const {
+    return polyMode;
+}
+
 void PolySynth::setFixedEnvelope(float attack, float decay, float sustain) {
     for (auto* voice : voices) {
         voice->setFixedEnvelope(attack, decay, sustain);
@@ -40,16 +60,25 @@ void PolySynth::setRelease(float release) {
 }
 
 void PolySynth::setNote(bool isNoteOn, Note note) {
+    const int voiceCount = activeVoiceCount();
+
     if (isNoteOn) {
         note.timeStamp = timeStamp++;
         noteState.push_back(note);
 
+        if (polyMode != Poly) {
+            for (int i = 0; i < voiceCount; i++) {
+                voices.at(i)->setNoteOn(note);
+            }
+            return;
+        }
+
         int order[VOICE_COUNT];
-        for (int k = 0; k < VOICE_COUNT; k++) {
+        for (int k = 0; k < voiceCount; k++) {
             order[k] = k;
         }
 
-        std::sort(order, order + VOICE_COUNT, [&](int a, int b) {
+        std::sort(order, order + voiceCount, [&](int a, int b) {
             unsigned long ta = voices.at(a)->noteTimeStamp;
             unsigned long tb = voices.at(b)->noteTimeStamp;
             if (ta != tb) {
@@ -58,7 +87,7 @@ void PolySynth::setNote(bool isNoteOn, Note note) {
             return a < b;
         });
 
-        for (int j = 0; j < VOICE_COUNT; j++) {
+        for (int j = 0; j < voiceCount; j++) {
             int i = order[j];
             if (!voices.at(i)->isPlaying()) {
                 voices.at(i)->setNoteOn(note);
@@ -66,7 +95,7 @@ void PolySynth::setNote(bool isNoteOn, Note note) {
             }
         }
 
-        for (int j = 0; j < VOICE_COUNT; j++) {
+        for (int j = 0; j < voiceCount; j++) {
             int i = order[j];
             if (!voices.at(i)->isPressed()) {
                 voices.at(i)->setNoteOn(note);
@@ -86,9 +115,24 @@ void PolySynth::setNote(bool isNoteOn, Note note) {
         }
     }
 
-    for (int i = 0; i < VOICE_COUNT; i++) {
-        if (voices.at(i)->currentPitch() == note.pitch && voices.at(i)->isPlaying()) {
-            voices.at(i)->setNoteOff();
+    bool sendNoteOff = true;
+
+    if (polyMode != Poly) {
+        if (!noteState.empty()) {
+            for (int i = 0; i < voiceCount; i++) {
+                if (voices.at(i)->currentPitch() != noteState.back().pitch) {
+                    voices.at(i)->setNoteOn(noteState.back());
+                }
+                sendNoteOff = false;
+            }
+        }
+    }
+
+    if (sendNoteOff) {
+        for (int i = 0; i < voiceCount; i++) {
+            if (voices.at(i)->currentPitch() == note.pitch && voices.at(i)->isPlaying()) {
+                voices.at(i)->setNoteOff();
+            }
         }
     }
 }
@@ -100,5 +144,9 @@ float PolySynth::process() {
         result += voice->process();
     }
 
-    return result * 0.707f * 0.65f;
+    if (polyMode != Mono) {
+        result *= 0.707f;
+    }
+
+    return result * 0.65f;
 }

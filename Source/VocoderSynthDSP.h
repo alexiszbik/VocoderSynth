@@ -10,6 +10,7 @@ namespace ydaisy {
 class VocoderSynthDSP : public DSPKernel {
 public:
     enum Parameters {
+        PlayMode,
         Glide,
         Release,
         Count
@@ -20,6 +21,9 @@ public:
     void init(int channelCount, double sampleRate) override;
     void process(float** buf, int frameCount) override;
     void processMIDI(MIDIMessageType messageType, int channel, int dataA, int dataB) override;
+
+    PolySynth::EPolyMode getPlayMode() const;
+    bool isPoly() const;
 
 protected:
     void updateParameter(int index, float value) override;

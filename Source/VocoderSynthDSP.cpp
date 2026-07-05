@@ -4,6 +4,7 @@ using namespace ydaisy;
 
 VocoderSynthDSP::VocoderSynthDSP()
 : DSPKernel({
+    {PlayMode, "Play Mode"},
     {Glide, "Glide"},
     {Release, "Release"},
 }) {
@@ -14,11 +15,25 @@ void VocoderSynthDSP::init(int channelCount, double sampleRate) {
 
     synth.init(sampleRate);
     synth.setFixedEnvelope(kAttack, kDecay, kSustain);
+    setParameterValue(PlayMode, 1.f);
+    synth.setPolyMode(PolySynth::Mono);
     synth.setRelease(valueMapPow3(getValue(Release), 0.005f, 8.f));
 }
 
+PolySynth::EPolyMode VocoderSynthDSP::getPlayMode() const {
+    return synth.getPolyMode();
+}
+
+bool VocoderSynthDSP::isPoly() const {
+    return synth.getPolyMode() == PolySynth::Poly;
+}
+
+
 void VocoderSynthDSP::updateParameter(int index, float value) {
     switch (static_cast<Parameters>(index)) {
+        case PlayMode:
+            synth.setPolyMode(static_cast<PolySynth::EPolyMode>(valueMap(value, 0, 1)));
+            break;
         case Glide:
             synth.setGlide(value);
             break;

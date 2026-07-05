@@ -25,4 +25,6 @@ protected:
 
 private:
     ydaisy::VocoderSynthDSP dsp;
+    
+    bool isPoly = false;
 };
