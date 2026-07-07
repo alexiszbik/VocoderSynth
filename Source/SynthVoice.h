@@ -37,6 +37,7 @@ private:
     SmoothValue pitch;
     bool gate = false;
 
-    Oscillator osc;
+    Oscillator squareOsc;
+    Oscillator sawOsc;
     SynthEnv adsr;
 };

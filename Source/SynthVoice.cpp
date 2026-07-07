@@ -6,9 +6,13 @@ void SynthVoice::init(double sampleRate) {
 
     pitch.setImmediate(60.f);
 
-    osc.Init(sampleRate);
-    osc.SetWaveform(Oscillator::WAVE_POLYBLEP_SQUARE);
-    osc.SetAmp(0.707f);
+    squareOsc.Init(sampleRate);
+    squareOsc.SetWaveform(Oscillator::WAVE_POLYBLEP_SQUARE);
+    squareOsc.SetAmp(1.f);
+
+    sawOsc.Init(sampleRate);
+    sawOsc.SetWaveform(Oscillator::WAVE_POLYBLEP_SAW);
+    sawOsc.SetAmp(1.f);
 
     adsr.Init(sampleRate);
 }
@@ -37,7 +41,8 @@ void SynthVoice::setGate(bool newGate) {
 
 void SynthVoice::setNoteOn(Note note) {
     if (!adsr.IsRunning()) {
-        osc.Reset();
+        squareOsc.Reset();
+        sawOsc.Reset();
     }
 
     setPitch(note.pitch);
@@ -58,7 +63,12 @@ void SynthVoice::kill() {
 float SynthVoice::process() {
     pitch.dezipperCheck(glideFrameLength);
 
-    osc.SetFreq(mtof(pitch.getAndStep()));
+    const float mainPitch = pitch.getAndStep();
 
-    return osc.Process() * adsr.Process(gate);
+    squareOsc.SetFreq(mtof(mainPitch));
+    sawOsc.SetFreq(mtof(mainPitch - 12.f));
+
+    const float oscMix = sqrtDryWet(squareOsc.Process(), sawOsc.Process(), 0.4f);
+
+    return oscMix * adsr.Process(gate);
 }
