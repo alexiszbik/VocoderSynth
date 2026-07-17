@@ -68,7 +68,7 @@ float SynthVoice::process() {
     squareOsc.SetFreq(mtof(mainPitch));
     sawOsc.SetFreq(mtof(mainPitch - 12.f));
 
-    const float oscMix = sqrtDryWet(squareOsc.Process(), sawOsc.Process(), 0.4f);
+    const float oscMix = sqrtDryWet(squareOsc.Process(), sawOsc.Process(), 0.7f);
 
     return oscMix * adsr.Process(gate);
 }

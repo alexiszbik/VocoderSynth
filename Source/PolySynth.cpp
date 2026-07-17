@@ -144,9 +144,13 @@ float PolySynth::process() {
         result += voice->process();
     }
 
-    if (polyMode != Mono) {
-        result *= 0.707f;
+    static constexpr float kOutputGain = 0.65f;
+
+    if (polyMode == Poly) {
+        result *= kOutputGain * 0.5;
+    } else {
+        result *= kOutputGain;
     }
 
-    return result * 0.65f;
+    return result;
 }
